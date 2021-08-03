@@ -2,6 +2,8 @@
 
 import {getPackageVersion, isPackagePresent, runInstall} from '../_helpers.js';
 import {run as add} from '../../../src/cli/commands/add.js';
+import * as fs from '../../../src/util/fs.js';
+import path from 'path';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 120000;
 
@@ -76,6 +78,19 @@ test.concurrent('install hoister should remove newly hoisted dependencies from n
     expect(await getPackageVersion(config, 'b/@s/y')).toEqual('2.0.0');
 
     await add(config, reporter, {}, ['file:a/v2.0.0', 'file:b/v2.0.0']);
+
+    const getAllFilePaths = async currentPath => {
+      const lstat = await fs.lstat(currentPath);
+      if (lstat.isSymbolicLink() || lstat.isFile()) {
+        return [currentPath];
+      }
+
+      const files = await fs.readdir(currentPath);
+      const subFiles = files.map(file => getAllFilePaths(path.join(currentPath, file)));
+      return (await Promise.all(subFiles)).reduce((previous, current) => previous.concat(...current), []);
+    };
+    const allFilePathsInTestDirectory = await getAllFilePaths(config.cwd);
+    config.reporter.info(allFilePathsInTestDirectory.join('\n'));
 
     // assert "b/@s/x" has been removed
     expect(await getPackageVersion(config, '@s/x')).toEqual('2.0.0');
