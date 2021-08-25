@@ -98,7 +98,7 @@ export default class InstallationIntegrityChecker {
     if (this.config.modulesFolder) {
       return this.config.modulesFolder;
     } else if (this.config.enableMetaFolder) {
-      return path.join(this.config.lockfileFolder, constants.META_FOLDER);
+      return this.config.metaFolder || path.join(this.config.lockfileFolder, constants.META_FOLDER);
     } else {
       return path.join(this.config.lockfileFolder, constants.NODE_MODULES_FOLDER);
     }

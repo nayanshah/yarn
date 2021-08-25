@@ -103,6 +103,8 @@ export async function main({
   commander.option('--link-duplicates', 'create hardlinks to the repeated modules in node_modules');
   commander.option('--link-folder <path>', 'specify a custom folder to store global links');
   commander.option('--global-folder <path>', 'specify a custom folder to store global packages');
+  commander.option('--enable-meta-folder', 'enable storing .yarn-integrity file in Yarn meta folder');
+  commander.option('--meta-folder <path>', 'specify a custom folder for storing .yarn-integrity file');
   commander.option(
     '--error-log-file <path>',
     'specify a custom file path to log error details to when an error occurs',
@@ -508,9 +510,10 @@ export async function main({
   function writeErrorReport(log): ?string {
     const errorReportLoc = config.errorLogFile
       ? path.resolve(config.cwd, config.errorLogFile) // Use resolve to allow for relative and absolute paths
-      : config.enableMetaFolder
-        ? path.join(config.cwd, constants.META_FOLDER, 'yarn-error.log')
-        : path.join(config.cwd, 'yarn-error.log');
+      : path.resolve(config.enableMetaFolder
+                        ? (config.metaFolder || path.join(config.cwd, constants.META_FOLDER))
+                        : config.cwd,
+                    'yarn-error.log');
 
     try {
       fs.writeFileSync(errorReportLoc, log.join('\n\n') + '\n');
@@ -524,7 +527,7 @@ export async function main({
 
   const cwd = command.shouldRunInCurrentCwd ? commander.cwd : findProjectRoot(commander.cwd);
 
-  const folderOptionKeys = ['linkFolder', 'globalFolder', 'preferredCacheFolder', 'cacheFolder', 'modulesFolder'];
+  const folderOptionKeys = ['linkFolder', 'globalFolder', 'preferredCacheFolder', 'cacheFolder', 'modulesFolder', 'metaFolder'];
 
   // Resolve all folder options relative to cwd
   const resolvedFolderOptions = {};
@@ -539,6 +542,7 @@ export async function main({
       cwd,
       commandName,
       ...resolvedFolderOptions,
+      enableMetaFolder: commander.enableMetaFolder,
       errorLogFile: commander.errorLogFile,
       enablePnp: commander.pnp,
       disablePnp: commander.disablePnp,

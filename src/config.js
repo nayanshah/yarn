@@ -35,6 +35,7 @@ export type ConfigOptions = {
   preferOffline?: boolean,
   pruneOfflineMirror?: boolean,
   enableMetaFolder?: boolean,
+  metaFolder?: string,
   linkFileDependencies?: boolean,
   captureHar?: boolean,
   ignoreCpu?: boolean,
@@ -125,6 +126,8 @@ export default class Config {
 
   // cache packages in offline mirror folder as new .tgz files
   packBuiltPackages: boolean;
+
+  metaFolder: string;
 
   //
   linkedModules: Array<string>;
@@ -427,7 +430,8 @@ export default class Config {
     this.offlineCacheFolder = String(this.getOption('offline-cache-folder') || '') || null;
 
     this.pruneOfflineMirror = Boolean(this.getOption('yarn-offline-mirror-pruning'));
-    this.enableMetaFolder = Boolean(this.getOption('enable-meta-folder'));
+    this.enableMetaFolder = opts.enableMetaFolder || Boolean(this.getOption('enable-meta-folder'));
+
     this.enableLockfileVersions = Boolean(this.getOption('yarn-enable-lockfile-versions'));
     this.linkFileDependencies = Boolean(this.getOption('yarn-link-file-dependencies'));
     this.packBuiltPackages = Boolean(this.getOption('experimental-pack-script-packages-in-mirror'));
@@ -475,6 +479,7 @@ export default class Config {
     this.preferOffline = !!opts.preferOffline;
     this.modulesFolder = opts.modulesFolder;
     this.linkFolder = opts.linkFolder || constants.LINK_REGISTRY_DIRECTORY;
+    this.metaFolder = opts.metaFolder;
     this.offline = !!opts.offline;
     this.binLinks = !!opts.binLinks;
     this.updateChecksums = !!opts.updateChecksums;
