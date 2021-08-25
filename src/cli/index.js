@@ -510,10 +510,10 @@ export async function main({
   function writeErrorReport(log): ?string {
     const errorReportLoc = config.errorLogFile
       ? path.resolve(config.cwd, config.errorLogFile) // Use resolve to allow for relative and absolute paths
-      : path.resolve(config.enableMetaFolder
-                        ? (config.metaFolder || path.join(config.cwd, constants.META_FOLDER))
-                        : config.cwd,
-                    'yarn-error.log');
+      : path.resolve(
+          config.enableMetaFolder ? config.metaFolder || path.join(config.cwd, constants.META_FOLDER) : config.cwd,
+          'yarn-error.log',
+        );
 
     try {
       fs.writeFileSync(errorReportLoc, log.join('\n\n') + '\n');
@@ -527,7 +527,14 @@ export async function main({
 
   const cwd = command.shouldRunInCurrentCwd ? commander.cwd : findProjectRoot(commander.cwd);
 
-  const folderOptionKeys = ['linkFolder', 'globalFolder', 'preferredCacheFolder', 'cacheFolder', 'modulesFolder', 'metaFolder'];
+  const folderOptionKeys = [
+    'linkFolder',
+    'globalFolder',
+    'preferredCacheFolder',
+    'cacheFolder',
+    'modulesFolder',
+    'metaFolder',
+  ];
 
   // Resolve all folder options relative to cwd
   const resolvedFolderOptions = {};
